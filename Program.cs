@@ -45,7 +45,7 @@ class Program
         builder.Services.AddHttpClient<CloudflareApi>(client =>
         {
             client.BaseAddress = new Uri("https://api.cloudflare.com/client/v4");
-            client.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory");
+            client.DefaultRequestHeaders.Add("User-Agent", "Cloudflare-DDNS-client");
         });
 
         builder.Services.AddHttpClient<IGetIp, GetIp>(client =>
@@ -62,9 +62,10 @@ class Program
         var model = await getIp.GetIpWithCloudflareGeolocationApi(@"https://ipv4-check-perf.radar.cloudflare.com/api/info");
 
         Console.WriteLine(model.IpAddress);
+        Console.WriteLine(await getIp.GetIpWithIpfy("https://api.ipify.org"));
 
+        // await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
 
-        await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
         // var config = new CloudflareConfig
         // {
         //     ApiToken = "your_api_token",

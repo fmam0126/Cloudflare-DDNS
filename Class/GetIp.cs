@@ -39,6 +39,7 @@ public interface IGetIp
 {
     Task<string> GetIpWithCloudflareTrace(string traceDomain);
     Task<IpModel> GetIpWithCloudflareGeolocationApi(string geolocationUrl);
+    Task<string> GetIpWithIpfy(string ipifyDomain);
 }
 
 public class GetIp : IGetIp
@@ -89,6 +90,14 @@ public class GetIp : IGetIp
         }
         Console.WriteLine($"Ip not found");
         return "";
+    }
+    public async Task<string> GetIpWithIpfy(string ipifyDomain)
+    {
+        var response = await _httpClient.GetAsync(ipifyDomain);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        return content;
     }
 
     public async Task<IpModel> GetIpWithCloudflareGeolocationApi(string geolocationUrl)

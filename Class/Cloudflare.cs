@@ -13,4 +13,8 @@ public class CloudflareApi
         Console.WriteLine(content);
 
     }
+    public async Task UpdateDnsRecord(string zoneId, string apiToken, string recordId)
+    {
+
+    }
 }
