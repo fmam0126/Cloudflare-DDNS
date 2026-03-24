@@ -1,3 +1,5 @@
+using System.Data;
+
 public class CloudflareConfig
 {
     public string ApiToken { get; set; } = string.Empty;

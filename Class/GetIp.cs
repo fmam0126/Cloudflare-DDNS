@@ -35,22 +35,31 @@ public class IpModel
     [JsonPropertyName("ip_version")]
     public string IpVersion { get; init; } = string.Empty;
 }
-public static class GetIp
+public interface IGetIp
 {
-    static readonly HttpClient httpClient = new HttpClient();
+    Task<string> GetIpWithCloudflareTrace(string traceDomain);
+    Task<IpModel> GetIpWithCloudflareGeolocationApi(string geolocationUrl);
+}
+
+public class GetIp : IGetIp
+{
+    private readonly HttpClient _httpClient;
+
+    public GetIp(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
 
     // this needs to be redone as the cloudflare trace domain is only for debugging purposes.
-
 
     /// <summary>
     /// gets ip using cloudflaretrace
     /// </summary>
-    /// <param name="TraceDomain">Cloudflare trace api domain</param>
+    /// <param name="traceDomain">Cloudflare trace api domain</param>
     /// <returns>ip as a string or an empty string if ip isnt found</returns>
-    public static async Task<string> GetIpWithCloudflareTrace(string TraceDomain)
+    public async Task<string> GetIpWithCloudflareTrace(string traceDomain)
     {
-
-        HttpResponseMessage response = await httpClient.GetAsync(TraceDomain);
+        HttpResponseMessage response = await _httpClient.GetAsync(traceDomain);
 
         response.EnsureSuccessStatusCode();
         string responseBody = await response.Content.ReadAsStringAsync();
@@ -82,18 +91,14 @@ public static class GetIp
         return "";
     }
 
-    public static async Task<IpModel> GetIpWithCloudflareGeolocationApi(string GeolocationUrl)
+    public async Task<IpModel> GetIpWithCloudflareGeolocationApi(string geolocationUrl)
     {
-
-        var response = await httpClient.GetAsync(GeolocationUrl);
+        var response = await _httpClient.GetAsync(geolocationUrl);
         response.EnsureSuccessStatusCode();
-
-        // var responseBody = response.Content;
 
         using var responseStream = await response.Content.ReadAsStreamAsync();
         IpModel? ipModel = await JsonSerializer.DeserializeAsync<IpModel>(responseStream);
 
-
-        return ipModel;
+        return ipModel ?? new IpModel();
     }
 }
