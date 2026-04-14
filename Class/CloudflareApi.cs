@@ -20,7 +20,7 @@ public class CloudflareApi
         return content;
     }
 
-    public async Task MakeDnsRecordModelFromResponse(string responseContent)
+    public async Task<List<DnsRecord>> MakeDnsRecordModelFromResponse(string responseContent)
     {
         var options = new JsonSerializerOptions
         {
@@ -31,22 +31,24 @@ public class CloudflareApi
         var dnsRecordResponse = JsonSerializer.Deserialize<CloudflareResponse>(responseContent, options);
         if (dnsRecordResponse is not null)
         {
-            var dnsRecord = dnsRecordResponse.Result[0];
-            Console.WriteLine($"DNS Record ID: {dnsRecord.Id}");
-            Console.WriteLine($"DNS Record Name: {dnsRecord.Name}");
-            Console.WriteLine($"DNS Record Type: {dnsRecord.Type}");
-            Console.WriteLine($"DNS Record Content: {dnsRecord.Content}");
-            foreach (var item in dnsRecordResponse.Result)
+            var dnsRecord = dnsRecordResponse.Result;
+            Console.WriteLine($"DNS Record ID: {dnsRecord[0].Id}");
+            Console.WriteLine($"DNS Record Name: {dnsRecord[0].Name}");
+            Console.WriteLine($"DNS Record Type: {dnsRecord[0].Type}");
+            Console.WriteLine($"DNS Record Content: {dnsRecord[0].Content}");
+            foreach (var item in dnsRecord)
             {
                 Console.WriteLine($"DNS Record ID: {item.Id}");
                 Console.WriteLine($"DNS Record Name: {item.Name}");
                 Console.WriteLine($"DNS Record Type: {item.Type}");
                 Console.WriteLine($"DNS Record Content: {item.Content}");
             }
+            return dnsRecord;
         }
         else
         {
             Console.WriteLine("No DNS records found or failed to parse response.");
+            return null;
         }
     }
 
