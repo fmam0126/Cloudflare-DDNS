@@ -1,3 +1,5 @@
+namespace Cloudflare_DDNS.Models;
+
 public class DnsRecord
 {
     public string Id { get; set; } = string.Empty;

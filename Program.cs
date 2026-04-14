@@ -3,6 +3,10 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Cloudflare_DDNS.Class;
+using Cloudflare_DDNS.Interfaces;
+using Cloudflare_DDNS.Models;
+
 
 namespace Cloudflare_DDNS;
 
@@ -64,7 +68,7 @@ class Program
         Console.WriteLine(model.IpAddress);
         Console.WriteLine(await getIp.GetIpWithIpfy("https://api.ipify.org"));
 
-        // await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
+        await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
 
         // var config = new CloudflareConfig
         // {
