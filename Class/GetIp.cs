@@ -91,6 +91,11 @@ public class GetIp : IGetIp
         Console.WriteLine($"Ip not found");
         return "";
     }
+    /// <summary>
+    /// gets ip using ipfy api
+    /// </summary>
+    /// <param name="ipifyDomain">Domain for the ipfy API</param>
+    /// <returns>IP as a string or an empty string if IP isn't found</returns>
     public async Task<string> GetIpWithIpfy(string ipifyDomain)
     {
         var response = await _httpClient.GetAsync(ipifyDomain);
@@ -99,7 +104,11 @@ public class GetIp : IGetIp
         var content = await response.Content.ReadAsStringAsync();
         return content;
     }
-
+    /// <summary>
+    /// gets ip using the cloudflare geolocation api
+    /// </summary>
+    /// <param name="geolocationUrl">URL for the cloudflare geolocation API</param>
+    /// <returns>IpModel instance TODO: return IP string</returns>
     public async Task<IpModel> GetIpWithCloudflareGeolocationApi(string geolocationUrl)
     {
         var response = await _httpClient.GetAsync(geolocationUrl);
