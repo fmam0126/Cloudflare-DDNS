@@ -70,6 +70,9 @@ class Program
 
         await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
 
+
+        await cloudflareApi.MakeDnsRecordModelFromResponse(await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken));
+
         // var config = new CloudflareConfig
         // {
         //     ApiToken = "your_api_token",
