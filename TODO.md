@@ -8,17 +8,28 @@ Cloudflare ddns:
 - create update method to send post request to update the correct subdomain for the correct zone
 - make this run in a infinite loop with a configurable delay between ip change checks.
 
+- Read listDns and find Id from the correct record. ✅
+- make a method that maps a list DnsRecord models from listDns to the correct record. ✅
+- make a method that checks if the ip is different from the current record ip, and only then run update method. ✅
+- make sure that i dont send a extra listdns request for each record.✅
 
 
 
 CURRENT TODO:
-- make a list of A records to update in the config file, and loop through them to update each one if needed. HALF DONE dont want this logic 
+- make a list of A records to update in the config file, and loop through them to update each one if needed. Done ish
 
-- Read listDns and find Id from the correct record. ✅
-- make a method that maps a list DnsRecord models from listDns to the correct record. ✅
+- check if the ip from ipfy or other ip provider is valid. - blacklist cloudflare ips... etc
+- decide if i want to get the ip from multiple providers.
+- add error handling 
+- add error handling if network is down.
+- if the network is down and all outgoing requests are timing out. wait X minutes and try again.
+- maybe use polly?
+- add rate limiting
 
-- make a method that checks if the ip is different from the current record ip, and only then run update method.
-- make sure that i dont send a extra listdns request for each record.
+LATER:
+- add containerize the program with docker.
+- add ENV VARIABLES 
+- docker secrets?
 
 
 

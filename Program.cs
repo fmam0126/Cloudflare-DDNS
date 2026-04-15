@@ -69,24 +69,16 @@ class Program
         var cloudflareApi = host.Services.GetRequiredService<CloudflareApi>();
 
         // Console.WriteLine(await GetIp.GetIpWithCloudflareTrace("https://one.one.one.one/cdn-cgi/trace"));
-        var model = await getIp.GetIpWithCloudflareGeolocationApi(@"https://ipv4-check-perf.radar.cloudflare.com/api/info");
+        // var model = await getIp.GetIpWithCloudflareGeolocationApi(@"https://ipv4-check-perf.radar.cloudflare.com/api/info");
 
-        Console.WriteLine(model.IpAddress);
-        Console.WriteLine(await getIp.GetIpWithIpfy("https://api.ipify.org"));
+        // Console.WriteLine(model.IpAddress);
+        // Console.WriteLine(await getIp.GetIpWithIpfy("https://api.ipify.org"));
 
         // await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
-
-
+        
         List<DnsRecord> dnsRecords = await cloudflareApi.MakeDnsRecordModelFromResponse(await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken));
 
-        // var config = new CloudflareConfig
-        // {
-        //     ApiToken = "your_api_token",
-        //     ZoneId = "your_zone_id",
-        //     RecordId = "your_record_id"
-        // };
-
-        await cloudflareApi.UpdateRecordsIfNeeded(dnsRecords, cloudflareConfigRecords[0], cloudflareConfig, await getIp.GetIpWithIpfy("https://api.ipify.org"), dryRun: false);
+        await cloudflareApi.UpdateRecordsIfNeeded(dnsRecords, cloudflareConfigRecords, cloudflareConfig, await getIp.GetIpWithIpfy("https://api.ipify.org"), dryRun: cloudflareConfig.DryRun);
 
 
     }
