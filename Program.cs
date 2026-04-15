@@ -29,12 +29,18 @@ class Program
             return;
         }
         CloudflareConfig? cloudflareConfig;
+        List<CloudflareConfigRecord>? cloudflareConfigRecords;
         try
         {
             cloudflareConfig = config.GetSection("CloudflareConfig").Get<CloudflareConfig>();
             if (cloudflareConfig is null)
             {
                 throw new Exception("CloudflareConfig section is missing in appsettings.json");
+            }
+            cloudflareConfigRecords = config.GetSection("CloudflareConfigRecord").Get<List<CloudflareConfigRecord>>();
+            if (cloudflareConfigRecords is null || cloudflareConfigRecords.Count == 0)
+            {
+                throw new Exception("CloudflareConfigRecord section is missing or empty in appsettings.json");
             }
         }
         catch (System.Exception ex)
@@ -68,7 +74,7 @@ class Program
         Console.WriteLine(model.IpAddress);
         Console.WriteLine(await getIp.GetIpWithIpfy("https://api.ipify.org"));
 
-        await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
+        // await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
 
 
         List<DnsRecord> dnsRecords = await cloudflareApi.MakeDnsRecordModelFromResponse(await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken));
@@ -79,6 +85,8 @@ class Program
         //     ZoneId = "your_zone_id",
         //     RecordId = "your_record_id"
         // };
+
+        CloudflareSync.SyncDnsRecords(dnsRecords, cloudflareConfig, cloudflareConfigRecords);
 
 
     }

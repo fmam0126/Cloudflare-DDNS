@@ -10,10 +10,10 @@ public class CloudflareApi
     private readonly HttpClient _httpClient;
     public CloudflareApi(HttpClient httpClient) => _httpClient = httpClient;
 
-    public async Task<string> ListDnsRecords(string zoneId, string ApiToken)
+    public async Task<string> ListDnsRecords(string zoneId, string ApiToken, DnsRecordType type = DnsRecordType.A)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ApiToken);
-        var responseMessage = await _httpClient.GetAsync($"/client/v4/zones/{zoneId}/dns_records");
+        var responseMessage = await _httpClient.GetAsync($"/client/v4/zones/{zoneId}/dns_records?type={type}");
         responseMessage.EnsureSuccessStatusCode();
         string content = await responseMessage.Content.ReadAsStringAsync();
         Console.WriteLine(content);

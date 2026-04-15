@@ -12,10 +12,11 @@ Cloudflare ddns:
 
 
 CURRENT TODO:
-- make a list of A records to update in the config file, and loop through them to update each one if needed.
+- make a list of A records to update in the config file, and loop through them to update each one if needed. HALF DONE dont want this logic 
 
-- Read listDns and find Id from the correct record.
-- make a method that maps a list DnsRecord models from listDns to the correct record.
+- Read listDns and find Id from the correct record. ✅
+- make a method that maps a list DnsRecord models from listDns to the correct record. ✅
+
 - make a method that checks if the ip is different from the current record ip, and only then run update method.
 - make sure that i dont send a extra listdns request for each record.
 
