@@ -86,7 +86,7 @@ class Program
         //     RecordId = "your_record_id"
         // };
 
-        CloudflareSync.SyncDnsRecords(dnsRecords, cloudflareConfig, cloudflareConfigRecords);
+        await cloudflareApi.UpdateRecordsIfNeeded(dnsRecords, cloudflareConfigRecords[0], cloudflareConfig, await getIp.GetIpWithIpfy("https://api.ipify.org"), dryRun: false);
 
 
     }

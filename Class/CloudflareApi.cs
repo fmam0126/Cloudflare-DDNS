@@ -48,7 +48,7 @@ public class CloudflareApi
         else
         {
             Console.WriteLine("No DNS records found or failed to parse response.");
-            return null;
+            return new List<DnsRecord>();
         }
     }
 
@@ -90,6 +90,45 @@ public class CloudflareApi
         responseMessage.EnsureSuccessStatusCode();
 
         string responseBody = await responseMessage.Content.ReadAsStringAsync();
-        Console.WriteLine(responseBody);
+        Console.WriteLine($"DNS record updated successfully. statuscode: {responseMessage.StatusCode}");
+        Console.WriteLine($"response: {responseBody}");
+    }
+    // TODO redo with foreach for multiple records
+    public async Task UpdateRecordsIfNeeded(List<DnsRecord> dnsrecords, CloudflareConfigRecord configRecord, CloudflareConfig cloudflareConfig, string currentIp, bool dryRun = true)
+    {
+        var matchingRecord = dnsrecords.FirstOrDefault(r => r.Name == configRecord.Name && r.Type == configRecord.Type);
+        if (matchingRecord != null)
+        {
+            if (matchingRecord.Content != currentIp)
+            {
+                Console.WriteLine($"DNS record {matchingRecord.Name} needs to be updated from {matchingRecord.Content} to {currentIp}");
+                // Call UpdateDnsRecord method here with the appropriate parameters
+                if (!dryRun)
+                {
+                    Console.WriteLine($"Updating DNS record {matchingRecord.Name} to new IP {currentIp}");
+                    await UpdateDnsRecord(cloudflareConfig.ZoneId, 
+                    cloudflareConfig.ApiToken, 
+                    matchingRecord.Id, 
+                    matchingRecord.Name, 
+                    matchingRecord.Type, 
+                    currentIp, 
+                    matchingRecord.Ttl, 
+                    matchingRecord.Proxied, 
+                    matchingRecord.PrivateRouting, 
+                    matchingRecord.Comment);
+
+                }
+
+            }
+            else
+            {
+                Console.WriteLine($"DNS record {matchingRecord.Name} is up to date with IP {currentIp}");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"No matching DNS record found for {configRecord.Name} ({configRecord.Type}). Consider creating a new record.");
+            // Call CreateDnsRecord method here if you want to create a new record
+        }
     }
 }
