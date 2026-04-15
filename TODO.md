@@ -28,6 +28,8 @@ CURRENT TODO:
 - maybe use polly?
 - add rate limiting
 
+- look at batch api requests to limit the amount of requests. https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/batch
+
 LATER:
 - add containerize the program with docker.
 - add ENV VARIABLES 
