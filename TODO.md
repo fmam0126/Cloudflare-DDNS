@@ -18,6 +18,8 @@ Cloudflare ddns:
 CURRENT TODO:
 - make a list of A records to update in the config file, and loop through them to update each one if needed. Done ish
 
+- actually support pagination if there is more than 200 records.
+- multiple zone support.
 - check if the ip from ipfy or other ip provider is valid. - blacklist cloudflare ips... etc
 - decide if i want to get the ip from multiple providers.
 - add error handling 
