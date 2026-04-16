@@ -85,4 +85,9 @@ public class GetIp : IGetIp
 
         return ipModel ?? new IpModel();
     }
+
+    public Task<string> GetIpWithicanhazip(string icanhazipDomain)
+    {
+        throw new NotImplementedException();
+    }
 }

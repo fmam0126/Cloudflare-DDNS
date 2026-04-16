@@ -32,7 +32,7 @@ public class CloudflareApi
         var dnsRecordResponse = JsonSerializer.Deserialize<CloudflareResponse>(responseContent, options);
         if (dnsRecordResponse is not null)
         {
-            var dnsRecord = dnsRecordResponse.Result;
+            List<DnsRecord> dnsRecord = dnsRecordResponse.Result;
             // foreach (var item in dnsRecord)
             // {
             //     Console.WriteLine($"DNS Record ID: {item.Id}");

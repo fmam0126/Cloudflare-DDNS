@@ -68,6 +68,9 @@ class Program
         var getIp = host.Services.GetRequiredService<IGetIp>();
         var cloudflareApi = host.Services.GetRequiredService<CloudflareApi>();
 
+
+
+
         // Console.WriteLine(await GetIp.GetIpWithCloudflareTrace("https://one.one.one.one/cdn-cgi/trace"));
         // var model = await getIp.GetIpWithCloudflareGeolocationApi(@"https://ipv4-check-perf.radar.cloudflare.com/api/info");
 
