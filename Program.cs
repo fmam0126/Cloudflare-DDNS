@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Cloudflare_DDNS.Class;
 using Cloudflare_DDNS.Interfaces;
 using Cloudflare_DDNS.Models;
+using System.Net.Http.Headers;
 
 
 namespace Cloudflare_DDNS;
@@ -51,6 +52,15 @@ class Program
 
 
         var builder = Host.CreateApplicationBuilder();
+
+        builder.Services.ConfigureHttpClientDefaults(webBuilder =>
+        {
+            webBuilder.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                ConnectTimeout = TimeSpan.FromSeconds(15),
+                PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+            });
+        });
 
         builder.Services.AddHttpClient<CloudflareApi>(client =>
         {
