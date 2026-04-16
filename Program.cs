@@ -75,11 +75,67 @@ class Program
         // Console.WriteLine(await getIp.GetIpWithIpfy("https://api.ipify.org"));
 
         // await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
-        
-        List<DnsRecord> dnsRecords = await cloudflareApi.MakeDnsRecordModelFromResponse(await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken));
 
-        await cloudflareApi.UpdateRecordsIfNeeded(dnsRecords, cloudflareConfigRecords, cloudflareConfig, await getIp.GetIpWithIpfy("https://api.ipify.org"), dryRun: cloudflareConfig.DryRun);
+        string lastIp = "1";
+        string ip = string.Empty;
+        while (true)
+        {
+            try
+            {
+                ip = await getIp.GetIpWithIpfy("https://api.ipify.org");
 
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine($"Failed to retrieve current IP address. error: {ex.Message}");
+                Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
+                await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
+                continue;
+            }
+
+            if (ip == lastIp)
+            {
+                Console.WriteLine($"IP address has not changed. Current IP: {ip}, Last IP: {lastIp}");
+            }
+            else
+            {
+
+                Console.WriteLine($"IP address has changed. Current IP: {ip}, Last IP: {lastIp}");
+
+                Console.WriteLine($"running update check for {cloudflareConfigRecords.Count} records...");
+                List<DnsRecord> dnsRecords;
+
+                try
+                {
+                    dnsRecords = await cloudflareApi.MakeDnsRecordModelFromResponse(await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken));
+
+                }
+                catch (System.Exception ex)
+                {
+                    Console.WriteLine($"Failed to list DNS records from cloudflare. error: {ex.Message}");
+                    Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
+                    await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
+                    continue;
+                }
+
+                try
+                {
+                    await cloudflareApi.UpdateRecordsIfNeeded(dnsRecords, cloudflareConfigRecords, cloudflareConfig, ip, dryRun: cloudflareConfig.DryRun);
+                }
+                catch (System.Exception ex)
+                {
+                    Console.WriteLine($"Failed to update DNS records. error: {ex.Message}");
+                    Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
+                    await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
+                    continue;
+                }
+
+                lastIp = ip;
+            }
+            Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
+            await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
+
+        }
 
     }
 }

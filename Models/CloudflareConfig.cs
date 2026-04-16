@@ -4,7 +4,7 @@ namespace Cloudflare_DDNS.Models;
 public class CloudflareConfig
 {
     public bool DryRun { get; set; } = false;
-    public string ApiToken { get; set; } = string.Empty;
-    public string ZoneId { get; set; } = string.Empty;
-    // public string RecordId { get; set; } = string.Empty;
+    public int IntervalMinutes { get; set; } = 5;
+    public required string ApiToken { get; set; } = string.Empty;
+    public required string ZoneId { get; set; } = string.Empty;
 }

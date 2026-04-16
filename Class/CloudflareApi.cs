@@ -13,10 +13,11 @@ public class CloudflareApi
     public async Task<string> ListDnsRecords(string zoneId, string ApiToken, DnsRecordType type = DnsRecordType.A)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ApiToken);
+
         var responseMessage = await _httpClient.GetAsync($"/client/v4/zones/{zoneId}/dns_records?per_page=200&type={type}");
         responseMessage.EnsureSuccessStatusCode();
         string content = await responseMessage.Content.ReadAsStringAsync();
-        Console.WriteLine(content);
+        // Console.WriteLine(content);
         return content;
     }
 
@@ -32,17 +33,13 @@ public class CloudflareApi
         if (dnsRecordResponse is not null)
         {
             var dnsRecord = dnsRecordResponse.Result;
-            Console.WriteLine($"DNS Record ID: {dnsRecord[0].Id}");
-            Console.WriteLine($"DNS Record Name: {dnsRecord[0].Name}");
-            Console.WriteLine($"DNS Record Type: {dnsRecord[0].Type}");
-            Console.WriteLine($"DNS Record Content: {dnsRecord[0].Content}");
-            foreach (var item in dnsRecord)
-            {
-                Console.WriteLine($"DNS Record ID: {item.Id}");
-                Console.WriteLine($"DNS Record Name: {item.Name}");
-                Console.WriteLine($"DNS Record Type: {item.Type}");
-                Console.WriteLine($"DNS Record Content: {item.Content}");
-            }
+            // foreach (var item in dnsRecord)
+            // {
+            //     Console.WriteLine($"DNS Record ID: {item.Id}");
+            //     Console.WriteLine($"DNS Record Name: {item.Name}");
+            //     Console.WriteLine($"DNS Record Type: {item.Type}");
+            //     Console.WriteLine($"DNS Record Content: {item.Content}");
+            // }
             return dnsRecord;
         }
         else
@@ -85,13 +82,22 @@ public class CloudflareApi
 
         var json = JsonSerializer.Serialize(payload, options);
         using var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+        var responseMessage = new HttpResponseMessage();
+        try
+        {
+            responseMessage = await _httpClient.PatchAsync($"/client/v4/zones/{zoneId}/dns_records/{recordId}", httpContent);
+            responseMessage.EnsureSuccessStatusCode();
 
-        var responseMessage = await _httpClient.PatchAsync($"/client/v4/zones/{zoneId}/dns_records/{recordId}", httpContent);
-        responseMessage.EnsureSuccessStatusCode();
+            string responseBody = await responseMessage.Content.ReadAsStringAsync();
+            Console.WriteLine($"DNS record updated successfully. statuscode: {responseMessage.StatusCode}");
+            Console.WriteLine($"response: {responseBody}");
+        }
+        catch (System.Exception)
+        {
+            Console.WriteLine($"Failed to update DNS record. statuscode: {responseMessage.StatusCode}");
+            throw new Exception($"Failed to update DNS record. statuscode: {responseMessage.StatusCode}");
+        }
 
-        string responseBody = await responseMessage.Content.ReadAsStringAsync();
-        Console.WriteLine($"DNS record updated successfully. statuscode: {responseMessage.StatusCode}");
-        Console.WriteLine($"response: {responseBody}");
     }
     // TODO redo with foreach for multiple records
     public async Task UpdateRecordsIfNeeded(List<DnsRecord> dnsrecords, List<CloudflareConfigRecord> configRecords, CloudflareConfig cloudflareConfig, string currentIp, bool dryRun = true)
@@ -108,16 +114,25 @@ public class CloudflareApi
                     if (!dryRun)
                     {
                         Console.WriteLine($"Updating DNS record {matchingRecord.Name} to new IP {currentIp}");
-                        await UpdateDnsRecord(cloudflareConfig.ZoneId,
-                        cloudflareConfig.ApiToken,
-                        matchingRecord.Id,
-                        matchingRecord.Name,
-                        matchingRecord.Type,
-                        currentIp,
-                        matchingRecord.Ttl,
-                        matchingRecord.Proxied,
-                        matchingRecord.PrivateRouting,
-                        matchingRecord.Comment);
+                        try
+                        {
+                            await UpdateDnsRecord(cloudflareConfig.ZoneId,
+                            cloudflareConfig.ApiToken,
+                            matchingRecord.Id,
+                            matchingRecord.Name,
+                            matchingRecord.Type,
+                            currentIp,
+                            matchingRecord.Ttl,
+                            matchingRecord.Proxied,
+                            matchingRecord.PrivateRouting,
+                            matchingRecord.Comment);
+
+                        }
+                        catch (System.Exception ex)
+                        {
+                            Console.WriteLine($"Failed to update DNS record {matchingRecord.Name} to new IP {currentIp}. Error: {ex.Message}");
+                            throw new Exception($"Failed to update DNS record {matchingRecord.Name} to new IP {currentIp}");
+                        }
 
                     }
 
