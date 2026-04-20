@@ -1,0 +1,11 @@
+appsettings.json
+.git
+.gitignore
+.vscode
+bin/
+obj/
+TestResults/
+*.log
+*.user
+*.suo
+.vs/
