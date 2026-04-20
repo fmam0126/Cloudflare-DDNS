@@ -12,6 +12,34 @@ public class GetIp : IGetIp
     {
         _httpClient = httpClient;
     }
+    /// <summary>
+    /// validates if the provided string is a valid IPv4 address
+    /// </summary>
+    /// <param name="ip">The IP address to validate</param>
+    /// <returns>Returns true if the IP address is valid, false otherwise</returns>
+    public bool IsValidPublicIp4(string ip)
+    {
+        if (string.IsNullOrWhiteSpace(ip)) return false;
+
+        string[] octets = ip.Split('.');
+        if (octets.Length != 4) return false;
+
+        foreach (string octet in octets)
+        {
+            if (!int.TryParse(octet, out int value) || value < 0 || value > 255)
+            {
+                return false;
+            }
+        }
+        // REDO THIS
+        if (ip.EndsWith(".0") || ip.EndsWith(".255") || ip.EndsWith(".1") || ip.StartsWith("10.") || ip.StartsWith("192.168.") || ip.StartsWith("172.16.") || ip.StartsWith("172.31."))
+        {
+            return false;
+        }
+
+        return true;
+
+    }
 
     // this needs to be redone as the cloudflare trace domain is only for debugging purposes.
 
@@ -90,4 +118,5 @@ public class GetIp : IGetIp
         return await response.Content.ReadAsStringAsync();
 
     }
+
 }

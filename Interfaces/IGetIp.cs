@@ -2,6 +2,7 @@ namespace Cloudflare_DDNS.Interfaces;
 
 public interface IGetIp
 {
+    bool IsValidPublicIp4(string ip);
     Task<string> GetIpWithCloudflareTrace(string traceDomain);
     Task<string> GetIpWithCloudflareGeolocationApi(string geolocationUrl);
     Task<string> GetIpWithIpfy(string ipifyDomain);

@@ -113,7 +113,13 @@ class Program
                 await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
                 continue;
             }
-
+            if (!getIp.IsValidPublicIp4(ip))
+            {
+                Console.WriteLine($"Retrieved IP address is not a valid IPv4 address: {ip}");
+                Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
+                await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
+                continue;
+            }
             if (ip == lastIp)
             {
                 Console.WriteLine($"IP address has not changed. Current IP: {ip}, Last IP: {lastIp}");
