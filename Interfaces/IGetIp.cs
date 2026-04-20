@@ -1,5 +1,3 @@
-using Cloudflare_DDNS.Models;
-
 namespace Cloudflare_DDNS.Interfaces;
 
 public interface IGetIp

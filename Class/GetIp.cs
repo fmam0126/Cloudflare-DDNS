@@ -1,10 +1,6 @@
-using System.Diagnostics;
-using System.Net;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Cloudflare_DDNS.Models;
 using Cloudflare_DDNS.Interfaces;
-using Microsoft.VisualBasic;
 
 namespace Cloudflare_DDNS.Class;
 

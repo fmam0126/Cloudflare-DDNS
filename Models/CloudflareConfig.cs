@@ -1,4 +1,3 @@
-using System.Data;
 
 namespace Cloudflare_DDNS.Models;
 
