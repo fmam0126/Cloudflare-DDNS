@@ -75,7 +75,7 @@ public class GetIp : IGetIp
     /// </summary>
     /// <param name="geolocationUrl">URL for the cloudflare geolocation API</param>
     /// <returns>IpModel instance TODO: return IP string</returns>
-    public async Task<IpModel> GetIpWithCloudflareGeolocationApi(string geolocationUrl)
+    public async Task<string> GetIpWithCloudflareGeolocationApi(string geolocationUrl)
     {
         var response = await _httpClient.GetAsync(geolocationUrl);
         response.EnsureSuccessStatusCode();
@@ -83,11 +83,15 @@ public class GetIp : IGetIp
         using var responseStream = await response.Content.ReadAsStreamAsync();
         IpModel? ipModel = await JsonSerializer.DeserializeAsync<IpModel>(responseStream);
 
-        return ipModel ?? new IpModel();
+        return ipModel?.IpAddress ?? string.Empty;
     }
 
-    public Task<string> GetIpWithicanhazip(string icanhazipDomain)
+    public async Task<string> GetIpWithicanhazip(string icanhazipDomain)
     {
-        throw new NotImplementedException();
+        var response = await _httpClient.GetAsync(icanhazipDomain);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadAsStringAsync();
+
     }
 }

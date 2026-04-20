@@ -78,25 +78,36 @@ class Program
         var getIp = host.Services.GetRequiredService<IGetIp>();
         var cloudflareApi = host.Services.GetRequiredService<CloudflareApi>();
 
-
-
-
-        // Console.WriteLine(await GetIp.GetIpWithCloudflareTrace("https://one.one.one.one/cdn-cgi/trace"));
-        // var model = await getIp.GetIpWithCloudflareGeolocationApi(@"https://ipv4-check-perf.radar.cloudflare.com/api/info");
-
-        // Console.WriteLine(model.IpAddress);
-        // Console.WriteLine(await getIp.GetIpWithIpfy("https://api.ipify.org"));
-
-        // await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken);
-
         string lastIp = "1";
         string ip = string.Empty;
         while (true)
         {
+            // get current ip address
             try
             {
-                ip = await getIp.GetIpWithIpfy("https://api.ipify.org");
+                switch (cloudflareConfig.IpProvider)
+                {
+                    case GetIpProvider.CloudflareTrace:
+                        ip = await getIp.GetIpWithCloudflareTrace(cloudflareConfig.CloudflareTraceUrl);
+                        break;
+                    case GetIpProvider.CloudflareGeolocationApi:
+                        ip = await getIp.GetIpWithCloudflareGeolocationApi(cloudflareConfig.CloudflareGeolocationApiUrl);
+                        break;
+                    case GetIpProvider.Ipfy:
+                        ip = await getIp.GetIpWithIpfy(cloudflareConfig.IpfyUrl);
+                        break;
+                    case GetIpProvider.Icanhazip:
+                        ip = await getIp.GetIpWithicanhazip(cloudflareConfig.IcanhazipUrl);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(cloudflareConfig.IpProvider), cloudflareConfig.IpProvider, null);
+                }
 
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine($"Invalid IP provider specified in configuration: {ex.Message}");
+                break;
             }
             catch (System.Exception ex)
             {
@@ -112,7 +123,6 @@ class Program
             }
             else
             {
-
                 Console.WriteLine($"IP address has changed. Current IP: {ip}, Last IP: {lastIp}");
 
                 Console.WriteLine($"running update check for {cloudflareConfigRecords.Count} records...");
@@ -147,8 +157,6 @@ class Program
             }
             Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
             await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
-
         }
-
     }
 }

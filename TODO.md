@@ -22,6 +22,7 @@ CURRENT TODO:
 - multiple zone support. https://developers.cloudflare.com/api/resources/zones/methods/list
 
 - check if the ip from ipfy or other ip provider is valid. - blacklist cloudflare ips... etc
+- add config option to choose which ip provider to use.
 
 - decide if i want to get the ip from multiple providers.
 
