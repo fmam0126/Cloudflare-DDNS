@@ -92,6 +92,13 @@ class Program
 
         string lastIp = "1";
         string ip = string.Empty;
+
+        var zones = await cloudflareApi.MakeCloudflareZoneModelFromResponse(await cloudflareApi.ListZones(cloudflareConfig.ApiToken));
+
+        foreach (var zone in zones)
+        {
+            Console.WriteLine($"Zone ID: {zone.Id}, Zone Name: {zone.Name}");
+        }
         while (true)
         {
             // get current ip address

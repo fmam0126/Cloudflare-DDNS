@@ -33,6 +33,8 @@ CURRENT TODO:
 - actually support pagination if there is more than 200 records.
 
 - multiple zone support. https://developers.cloudflare.com/api/resources/zones/methods/list
+  derive zone id from the domain name in the config
+
 - look at batch api requests to limit the amount of requests. https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/batch
 
 LATER:
