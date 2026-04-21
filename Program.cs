@@ -94,11 +94,29 @@ class Program
         string ip = string.Empty;
 
         var zones = await cloudflareApi.MakeCloudflareZoneModelFromResponse(await cloudflareApi.ListZones(cloudflareConfig.ApiToken));
+        // loop through zones and records to find matching zone for each record, then set the zone id in config for later use
 
+        
+        // TODO: add support for multiple zones here.
         foreach (var zone in zones)
         {
             Console.WriteLine($"Zone ID: {zone.Id}, Zone Name: {zone.Name}");
+            foreach (var record in cloudflareConfigRecords)
+            {
+                string recordDomainName = record.Name.Substring(record.Name.IndexOf('.') + 1);
+                if (recordDomainName.Equals(zone.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"Record {record.Name} matches zone {zone.Name}");
+                    cloudflareConfig.ZoneId = zone.Id;
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine($"Record {record.Name} does not match zone {zone.Name}");
+                }
+            }
         }
+
         while (true)
         {
             // get current ip address
