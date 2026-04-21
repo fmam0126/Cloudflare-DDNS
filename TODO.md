@@ -17,10 +17,6 @@ CURRENT TODO:
 
 - make a list of A records to update in the config file, and loop through them to update each one if needed. Done ish
 
-- actually support pagination if there is more than 200 records.
-
-- multiple zone support. https://developers.cloudflare.com/api/resources/zones/methods/list
-
 - check if the ip from ipfy or other ip provider is valid. DONE - blacklist cloudflare ips... etc
 
 - add config option to choose which ip provider to use. DONE
@@ -34,12 +30,15 @@ CURRENT TODO:
 - maybe use polly?
 - add rate limiting
 
+- actually support pagination if there is more than 200 records.
+
+- multiple zone support. https://developers.cloudflare.com/api/resources/zones/methods/list
 - look at batch api requests to limit the amount of requests. https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/batch
 
 LATER:
 
-- add containerize the program with docker.
-- add ENV VARIABLES
+- add containerize the program with docker. done
+- add ENV VARIABLES done. maybe redo for better env variable names
 - docker secrets?
 
 {"id":"EXAMPLE","name":"EXAMPLE.COM","type":"A","content":"0.0.0.0","proxiable":true,"proxied":true,"ttl":1,"settings":{},"meta":{},"comment":null,"tags":[],"created_on":"DATE","modified_on":"DATE"}

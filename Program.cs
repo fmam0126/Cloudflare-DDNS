@@ -18,7 +18,8 @@ class Program
         {
             config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("./appsettings.json", optional: false)
+                .AddJsonFile("./appsettings.json", optional: true)
+                .AddEnvironmentVariables()
                 .Build();
         }
         catch (System.Exception ex)
@@ -26,26 +27,40 @@ class Program
             Console.WriteLine($"Error loading configuration: {ex.Message}");
             return;
         }
+
         CloudflareConfig? cloudflareConfig;
         List<CloudflareConfigRecord>? cloudflareConfigRecords;
         try
         {
             cloudflareConfig = config.GetSection("CloudflareConfig").Get<CloudflareConfig>();
-            if (cloudflareConfig is null)
-            {
-                throw new Exception("CloudflareConfig section is missing in appsettings.json");
-            }
             cloudflareConfigRecords = config.GetSection("CloudflareConfigRecord").Get<List<CloudflareConfigRecord>>();
-            if (cloudflareConfigRecords is null || cloudflareConfigRecords.Count == 0)
-            {
-                throw new Exception("CloudflareConfigRecord section is missing or empty in appsettings.json");
-            }
         }
         catch (System.Exception ex)
         {
             Console.WriteLine($"Error parsing CloudflareConfig: {ex.Message}");
             return;
         }
+        string csvRecords = Environment.GetEnvironmentVariable("DnsRecords") ?? string.Empty;
+
+        if (!string.IsNullOrEmpty(csvRecords))
+        {
+            cloudflareConfigRecords = csvRecords.Split(",").Select(record => new CloudflareConfigRecord
+            {
+                Name = record.Trim()
+            }).ToList();
+        }
+
+        if (cloudflareConfig is null)
+        {
+            Console.WriteLine("CloudflareConfig section is missing or invalid");
+            return;
+        }
+        if (cloudflareConfigRecords is null || cloudflareConfigRecords.Count == 0)
+        {
+            Console.WriteLine("CloudflareConfigRecord section is missing or invalid");
+            return;
+        }
+
 
 
         var builder = Host.CreateApplicationBuilder();
@@ -113,6 +128,7 @@ class Program
                 await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
                 continue;
             }
+
             if (!getIp.IsValidPublicIp4(ip))
             {
                 Console.WriteLine($"Retrieved IP address is not a valid IPv4 address: {ip}");
@@ -120,6 +136,7 @@ class Program
                 await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
                 continue;
             }
+
             if (ip == lastIp)
             {
                 Console.WriteLine($"IP address has not changed. Current IP: {ip}, Last IP: {lastIp}");
