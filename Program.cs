@@ -90,30 +90,51 @@ class Program
         var getIp = host.Services.GetRequiredService<IGetIp>();
         var cloudflareApi = host.Services.GetRequiredService<CloudflareApi>();
 
-        string lastIp = "1";
+        string lastIp = string.Empty;
         string ip = string.Empty;
 
-        var zones = await cloudflareApi.MakeCloudflareZoneModelFromResponse(await cloudflareApi.ListZones(cloudflareConfig.ApiToken));
-        // loop through zones and records to find matching zone for each record, then set the zone id in config for later use
+        List<CloudflareZone> zones;
+        // TODO: handle this
+        try
+        {
+            zones = await cloudflareApi.MakeCloudflareZoneModelFromResponse(await cloudflareApi.ListZones(cloudflareConfig.ApiToken));
 
-        
-        // TODO: add support for multiple zones here.
+        }
+        catch (System.Exception)
+        {
+
+            throw;
+        }
+
+        // loop through zones and records to find matching zone for each record, then make a map of zone to records for later use in update logic. 
+        // this is needed to support multiple zones and records that may belong to different zones.
+        var zoneToRecordMap = new Dictionary<string, List<CloudflareConfigRecord>>();
+
         foreach (var zone in zones)
         {
             Console.WriteLine($"Zone ID: {zone.Id}, Zone Name: {zone.Name}");
             foreach (var record in cloudflareConfigRecords)
             {
-                string recordDomainName = record.Name.Substring(record.Name.IndexOf('.') + 1);
-                if (recordDomainName.Equals(zone.Name, StringComparison.OrdinalIgnoreCase))
+                if (record.Name.EndsWith(zone.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine($"Record {record.Name} matches zone {zone.Name}");
-                    cloudflareConfig.ZoneId = zone.Id;
-                    break;
+                    if (!zoneToRecordMap.ContainsKey(zone.Id))
+                    {
+                        zoneToRecordMap[zone.Id] = new List<CloudflareConfigRecord>();
+                    }
+                    zoneToRecordMap[zone.Id].Add(record);
+
+
                 }
-                else
-                {
-                    Console.WriteLine($"Record {record.Name} does not match zone {zone.Name}");
-                }
+
+                // string recordDomainName = record.Name.Substring(record.Name.IndexOf('.') + 1);
+                // if (recordDomainName.Equals(zone.Name, StringComparison.OrdinalIgnoreCase))
+                // {
+                //     Console.WriteLine($"Record {record.Name} matches zone {zone.Name}");
+                //     cloudflareConfig.ZoneId = zone.Id;
+
+                //     break;
+                // }
             }
         }
 
@@ -153,7 +174,7 @@ class Program
                 await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
                 continue;
             }
-
+            // check if ip is valid public ipv4 address
             if (!getIp.IsValidPublicIp4(ip))
             {
                 Console.WriteLine($"Retrieved IP address is not a valid IPv4 address: {ip}");
@@ -161,7 +182,7 @@ class Program
                 await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
                 continue;
             }
-
+            // compare with last ip address, if changed then update cloudflare dns record
             if (ip == lastIp)
             {
                 Console.WriteLine($"IP address has not changed. Current IP: {ip}, Last IP: {lastIp}");
@@ -170,36 +191,56 @@ class Program
             {
                 Console.WriteLine($"IP address has changed. Current IP: {ip}, Last IP: {lastIp}");
 
-                Console.WriteLine($"running update check for {cloudflareConfigRecords.Count} records...");
-                List<DnsRecord> dnsRecords;
+                // List<DnsRecord> dnsRecords;
+                // TODO: Update here for multiple zone support.
+                foreach (var entry in zoneToRecordMap)
+                {
+                    string zoneId = entry.Key;
+                    var recordsInThisZone = entry.Value;
+                    Console.WriteLine($"running update check for {cloudflareConfigRecords.Count} records...");
+                    try
+                    {
+                        // lists dns records in this zone and makes a model out of the response
+                        var response = await cloudflareApi.ListDnsRecords(zoneId, cloudflareConfig.ApiToken);
+                        List<DnsRecord> currentDnsRecords = await cloudflareApi.MakeDnsRecordModelFromResponse(response);
 
-                try
-                {
-                    dnsRecords = await cloudflareApi.MakeDnsRecordModelFromResponse(await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken));
+                        // runs update logic for all records in this zone
+                        await cloudflareApi.UpdateRecordsIfNeeded(currentDnsRecords, recordsInThisZone, cloudflareConfig, ip, dryRun: cloudflareConfig.DryRun);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Console.WriteLine($"Failed to update Zone {zoneId}. Error: {ex.Message}");
+                        continue;
+                    }
+                }
+                // try
+                // {
+                //     dnsRecords = await cloudflareApi.MakeDnsRecordModelFromResponse(await cloudflareApi.ListDnsRecords(cloudflareConfig.ZoneId, cloudflareConfig.ApiToken));
 
-                }
-                catch (System.Exception ex)
-                {
-                    Console.WriteLine($"Failed to list DNS records from cloudflare. error: {ex.Message}");
-                    Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
-                    await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
-                    continue;
-                }
+                // }
+                // catch (System.Exception ex)
+                // {
+                //     Console.WriteLine($"Failed to list DNS records from cloudflare. error: {ex.Message}");
+                //     Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
+                //     await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
+                //     continue;
+                // }
 
-                try
-                {
-                    await cloudflareApi.UpdateRecordsIfNeeded(dnsRecords, cloudflareConfigRecords, cloudflareConfig, ip, dryRun: cloudflareConfig.DryRun);
-                }
-                catch (System.Exception ex)
-                {
-                    Console.WriteLine($"Failed to update DNS records. error: {ex.Message}");
-                    Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
-                    await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
-                    continue;
-                }
+                // try
+                // {
+                //     await cloudflareApi.UpdateRecordsIfNeeded(dnsRecords, cloudflareConfigRecords, cloudflareConfig, ip, dryRun: cloudflareConfig.DryRun);
+                // }
+                // catch (System.Exception ex)
+                // {
+                //     Console.WriteLine($"Failed to update DNS records. error: {ex.Message}");
+                //     Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
+                //     await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
+                //     continue;
+                // }
 
                 lastIp = ip;
             }
+
             Console.WriteLine($"Waiting for {cloudflareConfig.IntervalMinutes} minutes before next check...");
             await Task.Delay(TimeSpan.FromMinutes(cloudflareConfig.IntervalMinutes));
         }
