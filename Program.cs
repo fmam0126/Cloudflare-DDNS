@@ -74,7 +74,7 @@ class Program
             });
         });
 
-        builder.Services.AddHttpClient<CloudflareApi>(client =>
+        builder.Services.AddHttpClient<ICloudflareApi, CloudflareApi>(client =>
         {
             client.BaseAddress = new Uri("https://api.cloudflare.com/client/v4");
             client.DefaultRequestHeaders.Add("User-Agent", "Cloudflare-DDNS-client");
@@ -88,7 +88,7 @@ class Program
         // Build and resolve services
         using var host = builder.Build();
         var getIp = host.Services.GetRequiredService<IGetIp>();
-        var cloudflareApi = host.Services.GetRequiredService<CloudflareApi>();
+        var cloudflareApi = host.Services.GetRequiredService<ICloudflareApi>();
 
         string lastIp = string.Empty;
         string ip = string.Empty;
