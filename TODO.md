@@ -35,12 +35,14 @@ CURRENT TODO:
 - multiple zone support. https://developers.cloudflare.com/api/resources/zones/methods/list DONE
   derive zone id from the domain name in the config DONE
 
+  TEST MULTIPLE ZONES
+
 - look at batch api requests to limit the amount of requests. https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/batch
+
+- get ip from stun server.
 
 LATER:
 
 - add containerize the program with docker. done
 - add ENV VARIABLES done. maybe redo for better env variable names
 - docker secrets?
-
-{"id":"EXAMPLE","name":"EXAMPLE.COM","type":"A","content":"0.0.0.0","proxiable":true,"proxied":true,"ttl":1,"settings":{},"meta":{},"comment":null,"tags":[],"created_on":"DATE","modified_on":"DATE"}

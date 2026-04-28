@@ -25,7 +25,11 @@ public class CloudflareApi : ICloudflareApi
         // Console.WriteLine(content);
         return content;
     }
-
+    /// <summary>
+    /// Retrieves a list of zones from the Cloudflare API using the provided API token for authentication. The method sends an HTTP GET request to the Cloudflare API endpoint for listing zones, including the API token in the request headers for authorization. It returns the response content as a string, which contains the list of zones in JSON format. If the request is successful, it ensures that the response status code indicates success; otherwise, it throws an exception.
+    /// </summary>
+    /// <param name="ApiToken">The API token for authentication with the Cloudflare API.</param>
+    /// <returns>A string containing the JSON response with the list of zones.</returns>
     public async Task<string> ListZones(string ApiToken)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ApiToken);
@@ -36,7 +40,11 @@ public class CloudflareApi : ICloudflareApi
         // Console.WriteLine(content);
         return content;
     }
-
+    /// <summary>
+    /// Parses the response content from the Cloudflare API and converts it into a list of CloudflareZone objects. The method uses JSON deserialization to convert the JSON response into a CloudflareZoneResponse object, which contains a list of CloudflareZone objects. If the deserialization is successful and zones are found, it returns the list of CloudflareZone objects; otherwise, it returns an empty list and prints a message indicating that no zones were found or that parsing failed.
+    /// </summary>
+    /// <param name="responseContent">The response content from the Cloudflare API.</param>
+    /// <returns>A list of CloudflareZone objects.</returns>
     public Task<List<CloudflareZone>> MakeCloudflareZoneModelFromResponse(string responseContent)
     {
         var options = new JsonSerializerOptions
