@@ -41,6 +41,8 @@ CURRENT TODO:
 
 - get ip from stun server.
 
+- Decide what i want to do with icanhazip as its the same code as ipify.
+
 LATER:
 
 - add containerize the program with docker. done

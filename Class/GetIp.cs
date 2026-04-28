@@ -98,7 +98,7 @@ public class GetIp : IGetIp
     /// gets ip using the cloudflare geolocation api
     /// </summary>
     /// <param name="geolocationUrl">URL for the cloudflare geolocation API</param>
-    /// <returns>IpModel instance TODO: return IP string</returns>
+    /// <returns>IP string or an empty string if IP isnt found</returns>
     public async Task<string> GetIpWithCloudflareGeolocationApi(string geolocationUrl)
     {
         var response = await _httpClient.GetAsync(geolocationUrl);
@@ -109,7 +109,11 @@ public class GetIp : IGetIp
 
         return ipModel?.IpAddress ?? string.Empty;
     }
-
+    /// <summary>
+    /// gets ip using icanhazip
+    /// </summary>
+    /// <param name="icanhazipDomain">URL for Icanhazip</param>
+    /// <returns>Ip as an string.</returns>
     public async Task<string> GetIpWithicanhazip(string icanhazipDomain)
     {
         var response = await _httpClient.GetAsync(icanhazipDomain);
