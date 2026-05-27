@@ -1,0 +1,9 @@
+services:
+  cloudflare-ddns:
+    # Use the pre-built image from GitHub Container Registry
+    image: ghcr.io/fmam0126/cloudflare-ddns:main
+    # Alternatively, build locally:
+    # build: .
+    restart: unless-stopped
+    env_file:
+      - .env
