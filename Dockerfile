@@ -4,7 +4,7 @@ COPY . /source
 WORKDIR /source
 
 
-RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+RUN --mount=type=cache,id=nuget-${TARGETARCH},target=/root/.nuget/packages \
     dotnet publish -a ${TARGETARCH/amd64/x64} --self-contained true -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine AS final
