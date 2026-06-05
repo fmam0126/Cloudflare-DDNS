@@ -94,16 +94,14 @@ class Program
         string ip = string.Empty;
 
         List<CloudflareZone> zones;
-        // TODO: handle this
         try
         {
             zones = await cloudflareApi.MakeCloudflareZoneModelFromResponse(await cloudflareApi.ListZones(cloudflareConfig.ApiToken));
-
         }
-        catch (System.Exception)
+        catch (System.Exception ex)
         {
-
-            throw;
+            Console.WriteLine($"Failed to list Cloudflare zones. Error: {ex.Message}");
+            return;
         }
 
         // loop through zones and records to find matching zone for each record, then make a map of zone to records for later use in update logic. 
